@@ -26,14 +26,14 @@
 			const map = new maplibregl.Map({
 				container: 'map',
 				style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-				center: [139.75, 35.68],
+				center: [136.97465968589398, 37.04619165311153],
 				zoom: 9
 			});
 
 			map.on('load', () => {
 				map.addSource('tokyo', {
 					type: 'geojson',
-					data: 'tokyo_population.geojson'
+					data: 'Noto_population.geojson'
 				});
 
 				map.addLayer({
