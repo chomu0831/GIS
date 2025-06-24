@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>イスラエルとイランの主な衝突：歴史マップ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    #map { height: 600px; width: 100%; }
+    .legend { background: white; padding: 8px; font-size: 1em; }
+    .legend span { display: inline-block; width: 12px; height: 12px; margin-right: 4px; border-radius: 50%; }
+  </style>
+</head>
+<body>
+  <h2>イスラエルとイランの主な衝突：歴史マップ</h2>
+  <button id="nextBtn">次の出来事へ</button>
+  <div id="map"></div>
+  <div class="legend" id="legend"></div>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // === ベースマップ定義 ===
+    const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap, © CartoDB' });
+    const osmjp = L.tileLayer('https://tile.openstreetmap.jp/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors, osm.jp' });
+    const gsi = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', { attribution: '地理院タイル（日本のみ）' });
+    const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri' });
+
+    // マップ初期化
+    const map = L.map('map', {
+      center: [33, 42],
+      zoom: 3,
+      layers: [carto]
+    });
+
+    // レイヤーコントロール
+    const baseMaps = {
+      "CartoDB（英語）": carto,
+      "OpenStreetMap Japan": osmjp,
+      "地理院タイル": gsi,
+      "Esri World Imagery（衛星写真）": esri
+    };
+    L.control.layers(baseMaps).addTo(map);
+
+    // --- ここから下は前回のイベント・色分け・アニメーションなどそのまま ---
+    // ...（countryPos, COLOR, countryColorType, eventsは省略。前回のままコピペでOK）
+
+    // === 以下、前回のイベントピン＆アニメーション処理 ===
+    const countryPos = {
+      "イラン": [35.6892, 51.3890],
+      "イスラエル": [31.7683, 35.2137],
+      "アメリカ": [38.9, -77.0],
+      "ヒズボラ (レバノン)": [33.8547, 35.8623],
+      "レバノン": [33.8547, 35.8623],
+      "シリア": [33.5138, 36.2765],
+      "シリア (アサド政権)": [33.5138, 36.2765],
+      "ロシア": [55.751244, 37.618423],
+      "イギリス": [51.5074, -0.1278],
+      "フランス": [48.8566, 2.3522],
+      "ドイツ": [52.52, 13.405],
+      "中国": [39.9042, 116.4074],
+      "カタール": [25.2854, 51.5310],
+      "エジプト": [30.0444, 31.2357],
+      "国際原子力機関 (IAEA)": [48.2082, 16.3738],
+      "ハマス (パレスチナ)": [31.5, 34.47],
+      "イスラム聖戦 (パレスチナ)": [31.5, 34.47],
+      "ヨルダン": [31.9454, 35.9284],
+      "サウジアラビア": [24.7136, 46.6753]
+    };
+    const COLOR = {
+      "イラン": "#e53935",
+      "イラン側勢力": "#ffb3b3",
+      "イスラエル": "#1976d2",
+      "イスラエル側勢力": "#a3c8f7",
+      "中立": "#a259f7"
+    };
+    const countryColorType = {
+      "イラン": "イラン",
+      "ヒズボラ (レバノン)": "イラン側勢力",
+      "ハマス (パレスチナ)": "イラン側勢力",
+      "イスラム聖戦 (パレスチナ)": "イラン側勢力",
+      "イスラエル": "イスラエル",
+      "アメリカ": "イスラエル側勢力",
+      "イギリス": "イスラエル側勢力",
+      "フランス": "イスラエル側勢力",
+      "ドイツ": "イスラエル側勢力",
+      "レバノン": "中立",
+      "シリア": "中立",
+      "シリア (アサド政権)": "イラン側勢力",
+      "ロシア": "中立",
+      "中国": "中立",
+      "カタール": "中立",
+      "エジプト": "中立",
+      "国際原子力機関 (IAEA)": "中立",
+      "ヨルダン": "中立",
+      "サウジアラビア": "中立"
+    };
+    const events = [
+      {
+        name: "1979年 イラン革命",
+        pos: [35.6892, 51.3890],
+        desc: "イランが親米政権から反米・反イスラエル政権に転換。",
+        related: [
+          { name: "イラン", colorType: "イラン" },
+          { name: "イスラエル", colorType: "イスラエル" },
+          { name: "アメリカ", colorType: "イスラエル側勢力" }
+        ]
+      },
+      {
+        name: "レバノン内戦とヒズボラの台頭 (1980年代～現在)",
+        pos: [33.8547, 35.8623],
+        desc: "イランがヒズボラを支援し、ヒズボラがイスラエルと衝突。シリアやレバノン政府も関与。",
+        related: [
+          { name: "イラン", colorType: "イラン" },
+          { name: "イスラエル", colorType: "イスラエル" },
+          { name: "ヒズボラ (レバノン)", colorType: "イラン側勢力" },
+          { name: "レバノン", colorType: "中立" },
+          { name: "シリア", colorType: "中立" }
+        ]
+      },
+      {
+        name: "パレスチナ問題への介入 (主に2000年代～現在)",
+        pos: [31.5, 34.47],
+        desc: "イランがハマスやイスラム聖戦を支援し、イスラエルとパレスチナ勢力の衝突が激化。エジプト・カタールなどは仲介役。",
+        related: [
+          { name: "イラン", colorType: "イラン" },
+          { name: "イスラエル", colorType: "イスラエル" },
+          { name: "ハマス (パレスチナ)", colorType: "イラン側勢力" },
+          { name: "イスラム聖戦 (パレスチナ)", colorType: "イラン側勢力" },
+          { name: "エジプト", colorType: "中立" },
+          { name: "カタール", colorType: "中立" }
+        ]
+      },
+      {
+        name: "シリア内戦における代理戦争 (2011年～現在)",
+        pos: [33.5138, 36.2765],
+        desc: "イランがアサド政権を支援し、シリア国内で軍事的影響力を拡大。イスラエルはシリア国内のイラン関連施設を空爆。",
+        related: [
+          { name: "イラン", colorType: "イラン" },
+          { name: "イスラエル", colorType: "イスラエル" },
+          { name: "シリア (アサド政権)", colorType: "イラン側勢力" },
+          { name: "ロシア", colorType: "中立" },
+          { name: "アメリカ", colorType: "中立" }
+        ]
+      },
+      {
+        name: "イランの核開発問題 (2000年代～現在)",
+        pos: [35.6892, 51.3890],
+        desc: "イランの核開発に対し、イスラエルは強い懸念。米・欧州・中露なども関与し制裁や外交交渉。",
+        related: [
+          { name: "イラン", colorType: "イラン" },
+          { name: "イスラエル", colorType: "イスラエル" },
+          { name: "アメリカ", colorType: "イスラエル側勢力" },
+          { name: "イギリス", colorType: "イスラエル側勢力" },
+          { name: "フランス", colorType: "イスラエル側勢力" },
+          { name: "ドイツ", colorType: "イスラエル側勢力" },
+          { name: "中国", colorType: "中立" },
+          { name: "ロシア", colorType: "中立" },
+          { name: "国際原子力機関 (IAEA)", colorType: "中立" }
+        ]
+      },
+      {
+        name: "2024年4月1日 ダマスカス空爆",
+        pos: [33.5138, 36.2765],
+        desc: "シリアのイラン大使館領事部が空爆され、イラン革命防衛隊の高級司令官らが殺害された。",
+        related: [
+          { name: "イスラエル", colorType: "イスラエル" },
+          { name: "イラン", colorType: "イラン" },
+          { name: "シリア (アサド政権)", colorType: "イラン側勢力" }
+        ]
+      },
+      {
+        name: "2024年4月13日 イランによるイスラエルへの報復攻撃",
+        pos: [31.7683, 35.2137],
+        desc: "イランがイスラエル本土へドローンやミサイルを発射。米・英・仏がイスラエル迎撃を支援。ヨルダン・湾岸諸国も関与。",
+        related: [
+          { name: "イラン", colorType: "イラン" },
+          { name: "イスラエル", colorType: "イスラエル" },
+          { name: "アメリカ", colorType: "イスラエル側勢力" },
+          { name: "イギリス", colorType: "イスラエル側勢力" },
+          { name: "フランス", colorType: "イスラエル側勢力" },
+          { name: "ヨルダン", colorType: "中立" },
+          { name: "サウジアラビア", colorType: "中立" }
+        ]
+      },
+      {
+        name: "2024年4月19日 イスラエルによるイランへの報復攻撃",
+        pos: [35.6892, 51.3890],
+        desc: "イスラエルがイランに限定的な報復攻撃。アメリカは自制を促す立場。",
+        related: [
+          { name: "イスラエル", colorType: "イスラエル" },
+          { name: "イラン", colorType: "イラン" },
+          { name: "アメリカ", colorType: "中立" }
+        ]
+      }
+    ];
+    // --- 関係国マーカー ---
+    const allActors = {};
+    Object.keys(countryPos).forEach(name => {
+      const colorType = countryColorType[name] || "中立";
+      const color = COLOR[colorType] || "#888";
+      const marker = L.circleMarker(countryPos[name], {
+        radius: 16,
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.88,
+        weight: 2
+      }).addTo(map).bindPopup(name);
+      allActors[name] = marker;
+    });
+    // 出来事ピン
+    let current = 0;
+    const eventMarker = L.marker(events[current].pos).addTo(map)
+      .bindPopup(`<b>${events[current].name}</b><br>${events[current].desc}`).openPopup();
+    // 出来事進行＆関係国ライトアップ
+    document.getElementById('nextBtn').onclick = function() {
+      current = (current + 1) % events.length;
+      eventMarker.setLatLng(events[current].pos);
+      eventMarker.setPopupContent(`<b>${events[current].name}</b><br>${events[current].desc}`).openPopup();
+      map.setView(events[current].pos);
+      Object.entries(allActors).forEach(([name, marker]) => {
+        const baseColor = COLOR[countryColorType[name] || "中立"];
+        marker.setStyle({ fillOpacity: 0.3, color: baseColor, weight: 2 });
+      });
+      if (events[current].related && events[current].related.length > 0) {
+        events[current].related.forEach(actor => {
+          if (allActors[actor.name]) glowMarker(allActors[actor.name]);
+        });
+      }
+    };
+    function glowMarker(marker) {
+      let count = 0;
+      const orig = marker.options.fillColor;
+      const anim = setInterval(() => {
+        marker.setStyle({
+          fillOpacity: count % 2 === 0 ? 1.0 : 0.3,
+          color: count % 2 === 0 ? "#fff" : orig,
+          weight: count % 2 === 0 ? 6 : 2
+        });
+        count++;
+        if (count > 5) {
+          clearInterval(anim);
+          marker.setStyle({ fillOpacity: 0.7, color: orig, weight: 2 });
+        }
+      }, 220);
+    }
+    // 凡例
+    const legend = document.getElementById('legend');
+    legend.innerHTML = `
+      <span style="background:${COLOR["イラン"]}"></span>イラン　
+      <span style="background:${COLOR["イラン側勢力"]}"></span>イラン側勢力　
+      <span style="background:${COLOR["イスラエル"]}"></span>イスラエル　
+      <span style="background:${COLOR["イスラエル側勢力"]}"></span>イスラエル側勢力　
+      <span style="background:${COLOR["中立"]}"></span>中立/複数関係国
+    `;
+  </script>
+</body>
+</html>
