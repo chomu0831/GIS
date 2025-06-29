@@ -2,255 +2,460 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>イスラエルとイランの主な衝突：歴史マップ</title>
+  <title>イスラエル・イラン対立と中東情勢の歴史マップ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <style>
-    #map { height: 600px; width: 100%; }
-    .legend { background: white; padding: 8px; font-size: 1em; }
-    .legend span { display: inline-block; width: 12px; height: 12px; margin-right: 4px; border-radius: 50%; }
+    html, body { height: 100%; margin: 0; padding: 0; background: #f3f9ef; }
+    #container { display: flex; flex-direction: column; min-height: 100vh; height: 100vh; }
+    #map { flex: 1 1 auto; width: 100%; min-height: 320px; height: auto; z-index: 1; }
+
+    #sidepanel {
+      position: fixed;
+      top: 0;
+      right: -45vw;
+      width: clamp(220px, 32vw, 560px);
+      max-width: 40vw;
+      min-width: 220px;
+      height: 100vh;
+      background: rgba(255,255,255,0.99);
+      box-shadow: -2px 0 18px rgba(0,0,0,0.14);
+      z-index: 1200;
+      transition: right 0.27s cubic-bezier(.4,1.4,.5,1);
+      padding: clamp(10px,2vw,36px) clamp(2vw, 5vw, 38px) clamp(8px,1vw,22px) clamp(1vw, 3vw, 28px);
+      overflow-y: auto;
+      font-size: clamp(0.95em, 1.07vw, 1.1em);
+      border-radius: 14px 0 0 14px;
+      display: flex; flex-direction: column;
+      word-break: break-word;
+      box-sizing: border-box;
+    }
+    #sidepanel.active {
+      right: 0;
+    }
+    #closepanel {
+      position: absolute;
+      top: clamp(4px,1vw,18px); right: clamp(8px,1vw,26px);
+      background: none; border: none;
+      color: #444; font-size: 1.32em;
+      cursor: pointer;
+      padding: 0 5px;
+      font-weight: bold;
+      opacity: 0.46;
+      transition: opacity 0.18s;
+    }
+    #closepanel:hover { opacity: 0.9;}
+    #panelcontent b { font-size: 1.12em; }
+    #panelcontent { line-height: 1.7; }
+    #nextEventBtn, #resetEventBtn {
+      margin-top: 2em;
+      font-size: 1.08em;
+      border-radius: 8px;
+      padding: 8px 24px;
+      border: none;
+      background: #1976d2;
+      color: #fff;
+      cursor: pointer;
+      align-self: flex-end;
+      transition: background 0.18s;
+      display: none;
+    }
+    #nextEventBtn:disabled {
+      background: #cccccc;
+      color: #888888;
+      cursor: default;
+    }
+    #nextEventBtn:hover:enabled,
+    #resetEventBtn:hover {
+      background: #1253a2;
+    }
+    #resetEventBtn {
+      background: #f9b400;
+      color: #4a3500;
+      margin-top: 1em;
+      margin-bottom: 8px;
+      font-weight: bold;
+      display: none;
+    }
+
+    #legend {
+      background: rgba(255,255,255,0.97);
+      padding: clamp(4px,1vw,12px) clamp(2vw,1vw,12px) clamp(6px,1vw,14px) clamp(1vw,1vw,10px);
+      font-size: clamp(0.85em,0.96vw,1em);
+      position: absolute;
+      left: 2vw;
+      bottom: 12vh;
+      z-index: 500;
+      border-radius: 8px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.09);
+      line-height: 1.6;
+      min-width: 90px;
+      max-width: 40vw;
+      word-break: break-word;
+    }
+    .legend-color { display:inline-block; width:clamp(11px,2vw,15px); height:clamp(11px,2vw,15px); border-radius:50%; margin-right:4px; vertical-align:middle; border:1px solid #777;}
+    .legend-line { display:inline-block; width:clamp(10px,4vw,34px); height:6px; border-bottom:4px dotted #1976d2; margin-right:5px; vertical-align:middle;}
+    .legend-arrow { display:inline-block; width:clamp(8px,3vw,24px); height: 8px; background:linear-gradient(90deg,#e53935 70%,#fff 100%); clip-path: polygon(0 0, 90% 0, 100% 50%, 90% 100%, 0 100%);}
+    #legend b { font-size:1em;}
+
+    #timeline {
+      background: #fff;
+      border-top: 2px solid #eee;
+      font-size: clamp(0.92em, 1.1vw, 1.18em);
+      padding: clamp(4px,1vw,10px) 0 0 0;
+      display: flex;
+      overflow-x: auto;
+      gap: clamp(6px,1.2vw,18px);
+      justify-content: center;
+      align-items: flex-end;
+      z-index: 10;
+      position: relative;
+      min-height: clamp(40px, 8vh, 70px);
+    }
+    .tl-item {
+      position: relative;
+      padding: clamp(4px,1vw,12px) clamp(6px,1.2vw,18px);
+      margin-bottom: 6px;
+      border-radius: 10px;
+      background: #f3f3ff;
+      border: 2px solid #bdbdbd;
+      cursor: default;
+      min-width: clamp(60px,10vw,130px);
+      text-align: center;
+      transition: background .18s, border .18s;
+      font-weight: bold;
+      white-space: nowrap;
+      font-size: clamp(0.9em,1vw,1.02em);
+      box-shadow: 0 0 3px #e0e0e0;
+    }
+    .tl-item.active {
+      background: #1976d2;
+      color: #fff;
+      border-color: #1976d2;
+      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.14);
+    }
+    .tl-item .tl-tooltip {
+      display: none;
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 8px);
+      transform: translateX(-50%) scale(0.98);
+      background: #fffefb;
+      color: #222;
+      border: 1.5px solid #1976d2;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(25,118,210,0.13);
+      font-size: 0.97em;
+      min-width: 110px;
+      max-width: 220px;
+      padding: 10px 13px;
+      white-space: normal;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.18s, transform 0.18s;
+    }
+    .tl-item:hover .tl-tooltip, .tl-item:focus .tl-tooltip {
+      display: block;
+      opacity: 1;
+      transform: translateX(-50%) scale(1.04);
+    }
+    .tl-item:hover, .tl-item:focus {
+      cursor: default;
+    }
+
+    #timeline::-webkit-scrollbar { height: 8px; background: #f3f9ef;}
+    #timeline::-webkit-scrollbar-thumb { background: #d2e1d7; border-radius: 6px;}
+
+    @media (max-width: 800px) {
+      #sidepanel { width: 99vw; min-width: 60vw; max-width: 99vw; right: -102vw; border-radius: 0;}
+      #sidepanel.active { right: 0;}
+      #legend { font-size:0.90em; left: 1vw; min-width: 54px; max-width: 99vw;}
+      .tl-item { min-width: 40px;}
+    }
   </style>
 </head>
 <body>
-  <h2>イスラエルとイランの主な衝突：歴史マップ</h2>
-  <button id="nextBtn">次の出来事へ</button>
+<div id="container">
   <div id="map"></div>
-  <div class="legend" id="legend"></div>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script>
-    // === ベースマップ定義 ===
-    const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap, © CartoDB' });
-    const osmjp = L.tileLayer('https://tile.openstreetmap.jp/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors, osm.jp' });
-    const gsi = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', { attribution: '地理院タイル（日本のみ）' });
-    const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri' });
+  <div id="timeline"></div>
+  <div id="legend"></div>
+</div>
+<!-- 右側サイドパネル -->
+<div id="sidepanel">
+  <button id="closepanel" title="閉じる">✕</button>
+  <div id="panelcontent"></div>
+  <button id="nextEventBtn">次の出来事へ ▶</button>
+  <button id="resetEventBtn">最初に戻るよ～</button>
+</div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-polylinedecorator@1.7.0/dist/leaflet.polylineDecorator.min.js"></script>
+<script>
+  // --- ベースマップ ---
+  const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '©OpenStreetMap, ©CartoDB' });
+  const osmjp = L.tileLayer('https://tile.openstreetmap.jp/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors, osm.jp' });
+  const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri' });
 
-    // マップ初期化
-    const map = L.map('map', {
-      center: [33, 42],
-      zoom: 3,
-      layers: [carto]
-    });
+  const map = L.map('map', {
+    center: [31.6, 36.7],
+    zoom: 8,
+    layers: [carto],
+    zoomControl: true,
+    attributionControl: true
+  });
+  const baseMaps = {
+    "CartoDB（英語）": carto,
+    "OpenStreetMap Japan（日本語）": osmjp,
+    "Esri World Imagery（衛星写真）": esri
+  };
+  L.control.layers(baseMaps).addTo(map);
 
-    // レイヤーコントロール
-    const baseMaps = {
-      "CartoDB（英語）": carto,
-      "OpenStreetMap Japan": osmjp,
-      "地理院タイル": gsi,
-      "Esri World Imagery（衛星写真）": esri
-    };
-    L.control.layers(baseMaps).addTo(map);
+  // --- 色設定 ---
+  const COLOR = {
+    "イラン": "#e53935",
+    "イラン側勢力": "#ff8585",
+    "イスラエル": "#1976d2",
+    "イスラエル側勢力": "#5da4e6",
+    "中立": "#a259f7",
+    "ガザ": "#b255b2",
+    "西岸": "#317873",
+    "エルサレム": "#ff7f7f",
+    "パレスチナ1947": "#ffb347",
+    "イスラエル1948": "#81e6a8",
+    "占領地1967": "#e6e681"
+  };
 
-    // --- ここから下は前回のイベント・色分け・アニメーションなどそのまま ---
-    // ...（countryPos, COLOR, countryColorType, eventsは省略。前回のままコピペでOK）
+  // --- 地理座標 ---
+  const places = {
+    "イスラエル": [31.7683, 35.2137],
+    "イラン": [35.6892, 51.3890],
+    "パレスチナ1947": [[31.8,34.7],[31.8,35.5],[32.4,35.5],[32.4,34.7]],
+    "ガザ": [[31.22,34.2],[31.55,34.55],[31.35,34.55],[31.22,34.37],[31.22,34.2]],
+    "西岸": [[32.1,35.5],[32.5,35.5],[32.3,35.0],[31.5,35.0],[31.5,35.5],[32.1,35.5]],
+    "エルサレム": [31.7767, 35.2345],
+    "ヒズボラ": [33.8547, 35.8623],
+    "ハマス": [31.5, 34.47],
+    "シリア": [33.5138, 36.2765],
+    "レバノン": [33.8547, 35.8623],
+    "イラク": [33.3152, 44.3661],
+    "ナタンツ": [33.7265, 51.7217],
+    "テヘラン": [35.6892, 51.3890]
+  };
 
-    // === 以下、前回のイベントピン＆アニメーション処理 ===
-    const countryPos = {
-      "イラン": [35.6892, 51.3890],
-      "イスラエル": [31.7683, 35.2137],
-      "アメリカ": [38.9, -77.0],
-      "ヒズボラ (レバノン)": [33.8547, 35.8623],
-      "レバノン": [33.8547, 35.8623],
-      "シリア": [33.5138, 36.2765],
-      "シリア (アサド政権)": [33.5138, 36.2765],
-      "ロシア": [55.751244, 37.618423],
-      "イギリス": [51.5074, -0.1278],
-      "フランス": [48.8566, 2.3522],
-      "ドイツ": [52.52, 13.405],
-      "中国": [39.9042, 116.4074],
-      "カタール": [25.2854, 51.5310],
-      "エジプト": [30.0444, 31.2357],
-      "国際原子力機関 (IAEA)": [48.2082, 16.3738],
-      "ハマス (パレスチナ)": [31.5, 34.47],
-      "イスラム聖戦 (パレスチナ)": [31.5, 34.47],
-      "ヨルダン": [31.9454, 35.9284],
-      "サウジアラビア": [24.7136, 46.6753]
-    };
-    const COLOR = {
-      "イラン": "#e53935",
-      "イラン側勢力": "#ffb3b3",
-      "イスラエル": "#1976d2",
-      "イスラエル側勢力": "#a3c8f7",
-      "中立": "#a259f7"
-    };
-    const countryColorType = {
-      "イラン": "イラン",
-      "ヒズボラ (レバノン)": "イラン側勢力",
-      "ハマス (パレスチナ)": "イラン側勢力",
-      "イスラム聖戦 (パレスチナ)": "イラン側勢力",
-      "イスラエル": "イスラエル",
-      "アメリカ": "イスラエル側勢力",
-      "イギリス": "イスラエル側勢力",
-      "フランス": "イスラエル側勢力",
-      "ドイツ": "イスラエル側勢力",
-      "レバノン": "中立",
-      "シリア": "中立",
-      "シリア (アサド政権)": "イラン側勢力",
-      "ロシア": "中立",
-      "中国": "中立",
-      "カタール": "中立",
-      "エジプト": "中立",
-      "国際原子力機関 (IAEA)": "中立",
-      "ヨルダン": "中立",
-      "サウジアラビア": "中立"
-    };
-    const events = [
-      {
-        name: "1979年 イラン革命",
-        pos: [35.6892, 51.3890],
-        desc: "イランが親米政権から反米・反イスラエル政権に転換。",
-        related: [
-          { name: "イラン", colorType: "イラン" },
-          { name: "イスラエル", colorType: "イスラエル" },
-          { name: "アメリカ", colorType: "イスラエル側勢力" }
-        ]
-      },
-      {
-        name: "レバノン内戦とヒズボラの台頭 (1980年代～現在)",
-        pos: [33.8547, 35.8623],
-        desc: "イランがヒズボラを支援し、ヒズボラがイスラエルと衝突。シリアやレバノン政府も関与。",
-        related: [
-          { name: "イラン", colorType: "イラン" },
-          { name: "イスラエル", colorType: "イスラエル" },
-          { name: "ヒズボラ (レバノン)", colorType: "イラン側勢力" },
-          { name: "レバノン", colorType: "中立" },
-          { name: "シリア", colorType: "中立" }
-        ]
-      },
-      {
-        name: "パレスチナ問題への介入 (主に2000年代～現在)",
-        pos: [31.5, 34.47],
-        desc: "イランがハマスやイスラム聖戦を支援し、イスラエルとパレスチナ勢力の衝突が激化。エジプト・カタールなどは仲介役。",
-        related: [
-          { name: "イラン", colorType: "イラン" },
-          { name: "イスラエル", colorType: "イスラエル" },
-          { name: "ハマス (パレスチナ)", colorType: "イラン側勢力" },
-          { name: "イスラム聖戦 (パレスチナ)", colorType: "イラン側勢力" },
-          { name: "エジプト", colorType: "中立" },
-          { name: "カタール", colorType: "中立" }
-        ]
-      },
-      {
-        name: "シリア内戦における代理戦争 (2011年～現在)",
-        pos: [33.5138, 36.2765],
-        desc: "イランがアサド政権を支援し、シリア国内で軍事的影響力を拡大。イスラエルはシリア国内のイラン関連施設を空爆。",
-        related: [
-          { name: "イラン", colorType: "イラン" },
-          { name: "イスラエル", colorType: "イスラエル" },
-          { name: "シリア (アサド政権)", colorType: "イラン側勢力" },
-          { name: "ロシア", colorType: "中立" },
-          { name: "アメリカ", colorType: "中立" }
-        ]
-      },
-      {
-        name: "イランの核開発問題 (2000年代～現在)",
-        pos: [35.6892, 51.3890],
-        desc: "イランの核開発に対し、イスラエルは強い懸念。米・欧州・中露なども関与し制裁や外交交渉。",
-        related: [
-          { name: "イラン", colorType: "イラン" },
-          { name: "イスラエル", colorType: "イスラエル" },
-          { name: "アメリカ", colorType: "イスラエル側勢力" },
-          { name: "イギリス", colorType: "イスラエル側勢力" },
-          { name: "フランス", colorType: "イスラエル側勢力" },
-          { name: "ドイツ", colorType: "イスラエル側勢力" },
-          { name: "中国", colorType: "中立" },
-          { name: "ロシア", colorType: "中立" },
-          { name: "国際原子力機関 (IAEA)", colorType: "中立" }
-        ]
-      },
-      {
-        name: "2024年4月1日 ダマスカス空爆",
-        pos: [33.5138, 36.2765],
-        desc: "シリアのイラン大使館領事部が空爆され、イラン革命防衛隊の高級司令官らが殺害された。",
-        related: [
-          { name: "イスラエル", colorType: "イスラエル" },
-          { name: "イラン", colorType: "イラン" },
-          { name: "シリア (アサド政権)", colorType: "イラン側勢力" }
-        ]
-      },
-      {
-        name: "2024年4月13日 イランによるイスラエルへの報復攻撃",
-        pos: [31.7683, 35.2137],
-        desc: "イランがイスラエル本土へドローンやミサイルを発射。米・英・仏がイスラエル迎撃を支援。ヨルダン・湾岸諸国も関与。",
-        related: [
-          { name: "イラン", colorType: "イラン" },
-          { name: "イスラエル", colorType: "イスラエル" },
-          { name: "アメリカ", colorType: "イスラエル側勢力" },
-          { name: "イギリス", colorType: "イスラエル側勢力" },
-          { name: "フランス", colorType: "イスラエル側勢力" },
-          { name: "ヨルダン", colorType: "中立" },
-          { name: "サウジアラビア", colorType: "中立" }
-        ]
-      },
-      {
-        name: "2024年4月19日 イスラエルによるイランへの報復攻撃",
-        pos: [35.6892, 51.3890],
-        desc: "イスラエルがイランに限定的な報復攻撃。アメリカは自制を促す立場。",
-        related: [
-          { name: "イスラエル", colorType: "イスラエル" },
-          { name: "イラン", colorType: "イラン" },
-          { name: "アメリカ", colorType: "中立" }
-        ]
+  // --- タイムライン ---
+  const timeline = [
+    { year: 1979, label: "イラン革命", event: "イラン政変", map: "iranrev",
+      desc: `この出来事は、イスラエルとイランの現在の対立構造の起点とも言えるものです。<br>
+それまで親米・親イスラエルだったイランは、革命を経てイスラム共和国となり、反米・反イスラエルの姿勢を鮮明に打ち出しました。<br>
+これにより、イスラエルはイランから敵視され、アメリカも関係を断絶。以後、イランは中東において反イスラエル勢力を支援し始めます。` },
+
+    { year: 1982, label: "レバノン内戦とヒズボラの台頭", event: "ヒズボラ台頭", map: "hezbollah",
+      desc: `イランはレバノンのシーア派武装組織ヒズボラを積極的に支援し、イスラエルとの武力衝突が発生しました。<br>
+レバノン政府自体は中立的立場をとるものの、国内にヒズボラが存在することで複雑な情勢となっています。<br>
+また、シリアはこの時点でイランとの協力関係を強めており、ヒズボラの支援を側面から行っていました。` },
+
+    { year: 2000, label: "パレスチナ問題への介入", event: "パレスチナ情勢", map: "palestine2000",
+      desc: `イランはハマスやイスラム聖戦など、パレスチナのイスラム主義武装勢力を支援しており、<br>
+イスラエルとこれら勢力との間で武力衝突が頻発しています。<br>
+一方、エジプトやカタールなどの周辺国は、イスラエルともパレスチナ側とも関係を持ち、仲介を試みています。` },
+
+    { year: 2011, label: "シリア内戦における代理戦争", event: "シリア内戦", map: "syria",
+      desc: `イランはシリアのアサド政権を支援し、シリア国内に軍事拠点を拡大。<br>
+イスラエルはこれを重大な脅威と捉え、イラン関連施設を何度も空爆しました。<br>
+ロシアやアメリカはシリアに関与しているものの、それぞれイラン・イスラエルのどちらかに強く与するわけではなく、<br>
+あくまで自国の影響力維持を目的とした中立的な立場を取っています。` },
+
+    { year: 2015, label: "イランの核開発問題", event: "核合意と緊張再燃", map: "nuclear_issue",
+      desc: `イスラエルにとって、イランの核開発は最大級の安全保障上の脅威です。<br>
+2015年には核合意（JCPOA）が成立し、一時は国際的な緊張が緩和されましたが、<br>
+2018年のトランプ政権による合意離脱以降、イランはウラン濃縮を加速させ、現在は60%濃縮まで到達しています。<br>
+国際社会、とりわけイスラエルは、これを「核兵器開発に極めて近い」と警戒しています。` },
+
+    { year: 2024, label: "ダマスカス空爆", event: "2024年4月1日", map: "damascus2024",
+      desc: `ここで表示されるのは、2024年4月1日の「ダマスカス空爆」。<br>
+イスラエルがシリアのイラン大使館領事部を空爆し、イラン革命防衛隊の高官が死亡しました。<br>
+イランはこの攻撃に対し、明確な報復を宣言しました。` },
+
+    { year: 2024.1, label: "イランの報復攻撃", event: "2024年4月13日", map: "iran_response",
+      desc: `それに対応してマップ上に登場するのが、「2024年4月13日のイランの報復攻撃」です。<br>
+イランは初めて、自国から直接イスラエル本土へ向けてミサイルやドローンを発射。<br>
+アメリカ、イギリス、フランスがイスラエルを支援し、防空迎撃に加わりました。<br>
+ヨルダンも領空を通過する飛翔体を撃墜しましたが、直接的な同盟関係は否定しています。` },
+
+    { year: 2024.2, label: "イスラエルの限定的報復攻撃", event: "2024年4月19日", map: "israel_limited_response",
+      desc: `次に表示されるのは、「2024年4月19日 イスラエルによる限定的な報復攻撃」。<br>
+イスラエルはイラン国内の目標に対して反撃しましたが、大規模な軍事衝突には至らず、<br>
+アメリカは自制を促す立場をとりました。` },
+
+    { year: 2025, label: "イラン核施設攻撃", event: "2025年6月12日", map: "nuclear_attack",
+      desc: `そして最後に表示されるのが、2025年6月12日、イスラエルがイラン国内の核関連施設を攻撃した出来事です。<br>
+ナタンツやテヘランが標的となり、多数の死傷者が発生しました。<br>
+IAEAがイランの核活動に懸念を示した直後の出来事であり、イランはこれに対して報復攻撃を実施。<br>
+イスラエルとイランの対立は、いよいよ臨界点に近づいています。` }
+  ];
+
+  let mapLayers = [];
+  let currentTimelineIdx = 2; // 初期表示index
+
+  // --- タイムラインUI生成 ---
+  const tl = document.getElementById('timeline');
+  timeline.forEach((tlitem,i) => {
+    const div = document.createElement('div');
+    div.className = 'tl-item' + (i===2 ? ' active':'');
+    div.innerHTML = `${tlitem.year}<br>${tlitem.label}<div class="tl-tooltip">${tlitem.event}</div>`;
+    div.onclick = () => setTimeline(i, true);
+    tl.appendChild(div);
+  });
+
+  const highlightCountry = () => {
+    const iran = L.circle(places["イラン"], {radius: 110000, color: COLOR["イラン"], fillColor: COLOR["イラン"], fillOpacity: 0.22, weight: 4, interactive: false});
+    const israel = L.circle(places["イスラエル"], {radius: 90000, color: COLOR["イスラエル"], fillColor: COLOR["イスラエル"], fillOpacity: 0.22, weight: 4, interactive: false});
+    return [iran, israel];
+  };
+
+  function setTimeline(idx, moveMap) {
+    currentTimelineIdx = idx;
+    document.querySelectorAll('.tl-item').forEach((el,i)=>el.classList.toggle('active', i===idx));
+    mapLayers.forEach(l=>map.removeLayer(l));
+    mapLayers = [];
+    highlightCountry().forEach(l=>{ l.addTo(map); mapLayers.push(l); });
+
+    const key = timeline[idx].map;
+    if(key==="iranrev") {
+      const icon = L.divIcon({className:'',html:'<span style="font-size:1.7em;color:#e53935;">&#x2694;</span>',iconSize:[32,32]});
+      const marker = L.marker(places["イラン"],{icon});
+      marker.bindTooltip("1979年イラン革命").openTooltip();
+      mapLayers.push(marker); marker.addTo(map);
+      if(moveMap) map.setView([35.7, 50.5], 6);
+    } else if(key==="hezbollah") {
+      const icon = L.divIcon({className:'',html:'<span style="font-size:1.4em;color:#b255b2;">&#x2622;</span>',iconSize:[24,24]});
+      const markH = L.marker(places["ヒズボラ"],{icon}).bindTooltip("ヒズボラ（レバノン）");
+      mapLayers.push(markH); markH.addTo(map);
+      const arrow = L.polyline([places["イラン"],places["ヒズボラ"]],{color:"#e53935",weight:3,opacity:0.9});
+      mapLayers.push(arrow); arrow.addTo(map);
+      if (L.Symbol && L.Symbol.arrowHead) {
+        L.polylineDecorator(arrow,{
+          patterns:[{offset:'100%',repeat:0,symbol:L.Symbol.arrowHead({pixelSize:16,polygon:false,pathOptions:{stroke:true,color:"#e53935"}})}]
+        }).addTo(map);
       }
-    ];
-    // --- 関係国マーカー ---
-    const allActors = {};
-    Object.keys(countryPos).forEach(name => {
-      const colorType = countryColorType[name] || "中立";
-      const color = COLOR[colorType] || "#888";
-      const marker = L.circleMarker(countryPos[name], {
-        radius: 16,
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.88,
-        weight: 2
-      }).addTo(map).bindPopup(name);
-      allActors[name] = marker;
-    });
-    // 出来事ピン
-    let current = 0;
-    const eventMarker = L.marker(events[current].pos).addTo(map)
-      .bindPopup(`<b>${events[current].name}</b><br>${events[current].desc}`).openPopup();
-    // 出来事進行＆関係国ライトアップ
-    document.getElementById('nextBtn').onclick = function() {
-      current = (current + 1) % events.length;
-      eventMarker.setLatLng(events[current].pos);
-      eventMarker.setPopupContent(`<b>${events[current].name}</b><br>${events[current].desc}`).openPopup();
-      map.setView(events[current].pos);
-      Object.entries(allActors).forEach(([name, marker]) => {
-        const baseColor = COLOR[countryColorType[name] || "中立"];
-        marker.setStyle({ fillOpacity: 0.3, color: baseColor, weight: 2 });
-      });
-      if (events[current].related && events[current].related.length > 0) {
-        events[current].related.forEach(actor => {
-          if (allActors[actor.name]) glowMarker(allActors[actor.name]);
-        });
+      if(moveMap) map.setView([33.2,43],6);
+    } else if(key==="palestine2000") {
+      const gaza = L.polygon(places["ガザ"], {color: COLOR["ガザ"], fillColor: COLOR["ガザ"], fillOpacity:0.25,weight:2});
+      const westbank = L.polygon(places["西岸"], {color: COLOR["西岸"], fillColor: COLOR["西岸"], fillOpacity:0.18,weight:2});
+      const jeru = L.circleMarker(places["エルサレム"], {radius:11, color:COLOR["エルサレム"], fillColor:COLOR["エルサレム"], fillOpacity:0.95,weight:2});
+      [gaza,westbank,jeru].forEach(l=>{l.addTo(map);mapLayers.push(l);});
+      if(moveMap) map.setView([31.7, 35.1], 8);
+    } else if(key==="syria") {
+      const icon = L.divIcon({className:'',html:'<span style="font-size:1.3em;color:#a259f7;">&#x2694;</span>',iconSize:[22,22]});
+      const marker = L.marker(places["シリア"],{icon}).bindTooltip("シリア内戦");
+      mapLayers.push(marker); marker.addTo(map);
+      const arrow = L.polyline([places["イラン"],places["シリア"]],{color:"#e53935",weight:3,opacity:0.9});
+      mapLayers.push(arrow); arrow.addTo(map);
+      if (L.Symbol && L.Symbol.arrowHead) {
+        L.polylineDecorator(arrow,{
+          patterns:[{offset:'100%',repeat:0,symbol:L.Symbol.arrowHead({pixelSize:14,polygon:false,pathOptions:{stroke:true,color:"#e53935"}})}]
+        }).addTo(map);
       }
-    };
-    function glowMarker(marker) {
-      let count = 0;
-      const orig = marker.options.fillColor;
-      const anim = setInterval(() => {
-        marker.setStyle({
-          fillOpacity: count % 2 === 0 ? 1.0 : 0.3,
-          color: count % 2 === 0 ? "#fff" : orig,
-          weight: count % 2 === 0 ? 6 : 2
-        });
-        count++;
-        if (count > 5) {
-          clearInterval(anim);
-          marker.setStyle({ fillOpacity: 0.7, color: orig, weight: 2 });
-        }
-      }, 220);
+      if(moveMap) map.setView([33.5,39],6);
+    } else if(key==="nuclear_issue") {
+      const nuke = L.circleMarker(places["ナタンツ"], {radius:16,color:"#ff0d0d",fillColor:"#ff0d0d",fillOpacity:0.97,weight:7})
+        .bindTooltip("ナタンツ核施設");
+      nuke.addTo(map); mapLayers.push(nuke);
+      const arrow = L.polyline([places["イスラエル"],places["ナタンツ"]],{color:"#1976d2",weight:4,opacity:0.9});
+      mapLayers.push(arrow); arrow.addTo(map);
+      if (L.Symbol && L.Symbol.arrowHead) {
+        L.polylineDecorator(arrow,{
+          patterns:[{offset:'100%',repeat:0,symbol:L.Symbol.arrowHead({pixelSize:18,polygon:false,pathOptions:{stroke:true,color:"#1976d2"}})}]
+        }).addTo(map);
+      }
+      if(moveMap) map.setView([33,47],6);
+    } else if(key==="damascus2024") {
+      const marker = L.circleMarker(places["シリア"], {radius:16,color:"#e53935",fillColor:"#e53935",fillOpacity:0.97,weight:6})
+        .bindTooltip("ダマスカス空爆（2024年4月1日）");
+      marker.addTo(map); mapLayers.push(marker);
+      if(moveMap) map.setView([33.5,39],6);
+    } else if(key==="iran_response") {
+      const iran = L.circleMarker(places["イラン"], {radius:16,color:COLOR["イラン"],fillColor:COLOR["イラン"],fillOpacity:0.97,weight:6})
+        .bindTooltip("イラン：2024年報復攻撃");
+      const israel = L.circleMarker(places["イスラエル"], {radius:14,color:COLOR["イスラエル"],fillColor:COLOR["イスラエル"],fillOpacity:0.97,weight:6})
+        .bindTooltip("イスラエル：被攻撃");
+      [iran,israel].forEach(l=>{l.addTo(map);mapLayers.push(l);});
+      const arrow = L.polyline([places["イラン"],places["イスラエル"]],{color:"#e53935",weight:4,opacity:0.9});
+      mapLayers.push(arrow); arrow.addTo(map);
+      if (L.Symbol && L.Symbol.arrowHead) {
+        L.polylineDecorator(arrow,{
+          patterns:[{offset:'100%',repeat:0,symbol:L.Symbol.arrowHead({pixelSize:18,polygon:false,pathOptions:{stroke:true,color:"#e53935"}})}]
+        }).addTo(map);
+      }
+      if(moveMap) map.setView([33,42],5);
+    } else if(key==="israel_limited_response") {
+      const marker = L.circleMarker(places["イラン"], {radius:16,color:COLOR["イラン"],fillColor:COLOR["イラン"],fillOpacity:0.97,weight:6})
+        .bindTooltip("イスラエルの限定的報復（2024年4月19日）");
+      marker.addTo(map); mapLayers.push(marker);
+      if(moveMap) map.setView(places["イラン"],6);
+    } else if(key==="nuclear_attack") {
+      const nuke = L.circleMarker(places["ナタンツ"], {radius:16,color:"#ff0d0d",fillColor:"#ff0d0d",fillOpacity:0.97,weight:7})
+        .bindTooltip("ナタンツ核施設攻撃（2025年6月12日）");
+      nuke.addTo(map); mapLayers.push(nuke);
+      const arrow = L.polyline([places["イスラエル"],places["ナタンツ"]],{color:"#1976d2",weight:4,opacity:0.9});
+      mapLayers.push(arrow); arrow.addTo(map);
+      if (L.Symbol && L.Symbol.arrowHead) {
+        L.polylineDecorator(arrow,{
+          patterns:[{offset:'100%',repeat:0,symbol:L.Symbol.arrowHead({pixelSize:18,polygon:false,pathOptions:{stroke:true,color:"#1976d2"}})}]
+        }).addTo(map);
+      }
+      if(moveMap) map.setView([33,47],6);
     }
-    // 凡例
-    const legend = document.getElementById('legend');
-    legend.innerHTML = `
-      <span style="background:${COLOR["イラン"]}"></span>イラン　
-      <span style="background:${COLOR["イラン側勢力"]}"></span>イラン側勢力　
-      <span style="background:${COLOR["イスラエル"]}"></span>イスラエル　
-      <span style="background:${COLOR["イスラエル側勢力"]}"></span>イスラエル側勢力　
-      <span style="background:${COLOR["中立"]}"></span>中立/複数関係国
-    `;
-  </script>
+    // --- サイドパネル説明＋ボタン制御 ---
+    const panel = document.getElementById("sidepanel");
+    const content = document.getElementById("panelcontent");
+    content.innerHTML = `<b>${timeline[idx].year} ${timeline[idx].label}</b><br>${timeline[idx].desc}`;
+    panel.classList.add("active");
+
+    const nextBtn = document.getElementById("nextEventBtn");
+    const resetBtn = document.getElementById("resetEventBtn");
+    if (idx === timeline.length - 1) {
+      nextBtn.style.display = "none";
+      resetBtn.style.display = "block";
+    } else {
+      nextBtn.style.display = "block";
+      nextBtn.disabled = false;
+      nextBtn.textContent = "次の出来事へ ▶";
+      resetBtn.style.display = "none";
+    }
+  }
+
+  setTimeline(2, false);
+
+  document.getElementById("closepanel").onclick = ()=> {
+    document.getElementById("sidepanel").classList.remove("active");
+  };
+
+  document.getElementById("nextEventBtn").onclick = function() {
+    if (currentTimelineIdx < timeline.length - 1) {
+      setTimeline(currentTimelineIdx + 1, true);
+    }
+  };
+  document.getElementById("resetEventBtn").onclick = function() {
+    setTimeline(0, true);
+  };
+
+  document.getElementById('legend').innerHTML = `
+    <b>【凡例】</b><br>
+    <span class="legend-color" style="background:${COLOR["イラン"]};"></span>イラン　
+    <span class="legend-color" style="background:${COLOR["イスラエル"]};"></span>イスラエル　
+    <span class="legend-color" style="background:${COLOR["イラン側勢力"]};"></span>イラン側勢力　
+    <span class="legend-color" style="background:${COLOR["イスラエル側勢力"]};"></span>イスラエル側勢力　
+    <span class="legend-color" style="background:${COLOR["中立"]};"></span>中立/複数<br>
+    <span class="legend-color" style="background:${COLOR["ガザ"]};"></span>ガザ地区　
+    <span class="legend-color" style="background:${COLOR["西岸"]};"></span>ヨルダン川西岸地区　
+    <span class="legend-color" style="background:${COLOR["エルサレム"]};"></span>東エルサレム<br>
+    <span class="legend-color" style="background:${COLOR["パレスチナ1947"]};"></span>1947年分割案エリア　
+    <span class="legend-color" style="background:${COLOR["イスラエル1948"]};"></span>1948年イスラエル領　
+    <span class="legend-color" style="background:${COLOR["占領地1967"]};"></span>1967年以降の占領地<br>
+    <span class="legend-line"></span>国連分割案/国境線　
+    <span class="legend-arrow"></span>イランの勢力輸出／攻撃の矢印
+  `;
+</script>
 </body>
 </html>
