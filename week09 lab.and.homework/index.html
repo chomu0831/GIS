@@ -233,7 +233,7 @@
       position: relative;
       animation: attackAnim 1.2s ease-out forwards;
       filter: drop-shadow(0 0 8px #e53935);
-      transition: filter 0.2s;
+      transition: filter 3.0s;
     }
     @keyframes attackAnim {
       0% { transform: scale(1); }
@@ -556,7 +556,7 @@ IAEAがイランの核活動に懸念を示した直後の出来事であり、�
 
   function animateAttack(from, to, map, mapLayers) {
     // from, to: [lat, lng]
-    const steps = 60; // アニメーションのフレーム数
+    const steps = 150; // ←ここを増やすとゆっくりになる（例: 150）
     let current = 0;
     const latStep = (to[0] - from[0]) / steps;
     const lngStep = (to[1] - from[1]) / steps;
