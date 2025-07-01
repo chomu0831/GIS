@@ -171,6 +171,32 @@
       cursor: default;
     }
 
+    #photo-area {
+      width: 100%;
+      min-height: 180px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      margin-bottom: 8px;
+      pointer-events: none;
+      position: relative;
+      z-index: 20;
+    }
+    #photo-area img {
+      max-height: 170px;
+      max-width: 90vw;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      opacity: 0;
+      transform: translateY(-30px) scale(0.97);
+      transition: opacity 0.5s, transform 0.5s;
+      pointer-events: none;
+    }
+    #photo-area img.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
     #timeline::-webkit-scrollbar { height: 8px; background: #f3f9ef;}
     #timeline::-webkit-scrollbar-thumb { background: #d2e1d7; border-radius: 6px;}
 
@@ -179,6 +205,21 @@
       #sidepanel.active { right: 0;}
       #legend { font-size:0.90em; left: 1vw; min-width: 54px; max-width: 99vw;}
       .tl-item { min-width: 40px;}
+    }
+
+    .sidepanel-photo {
+      max-width: 98%;
+      margin: 12px 0 18px 0;
+      display: block;
+      border-radius: 12px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.13);
+      opacity: 0;
+      transform: translateY(-20px) scale(0.97);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .sidepanel-photo.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
   </style>
 </head>
@@ -252,6 +293,7 @@
   // --- タイムライン ---
   const timeline = [
     { year: 1979, label: "イラン革命", event: "イラン政変", map: "iranrev",
+      img: "イラン革命のお偉いさん.jpg", // ←ここをローカル画像ファイル名に
       desc: `この出来事は、イスラエルとイランの現在の対立構造の起点とも言えるものです。<br>
 それまで親米・親イスラエルだったイランは、革命を経てイスラム共和国となり、反米・反イスラエルの姿勢を鮮明に打ち出しました。<br>
 これにより、イスラエルはイランから敵視され、アメリカも関係を断絶。以後、イランは中東において反イスラエル勢力を支援し始めます。` },
@@ -416,8 +458,21 @@ IAEAがイランの核活動に懸念を示した直後の出来事であり、�
     // --- サイドパネル説明＋ボタン制御 ---
     const panel = document.getElementById("sidepanel");
     const content = document.getElementById("panelcontent");
-    content.innerHTML = `<b>${timeline[idx].year} ${timeline[idx].label}</b><br>${timeline[idx].desc}`;
+    const imgUrl = timeline[idx].img;
+    let imgTag = "";
+    if(imgUrl){
+      imgTag = `<img src="${imgUrl}" alt="${timeline[idx].label}" class="sidepanel-photo">`;
+    }
+    content.innerHTML = `<b>${timeline[idx].year} ${timeline[idx].label}</b><br>${imgTag}${timeline[idx].desc}`;
     panel.classList.add("active");
+
+    // 画像アニメーション
+    if(imgUrl){
+      setTimeout(()=>{
+        const img = content.querySelector("img.sidepanel-photo");
+        if(img) img.classList.add("show");
+      }, 30);
+    }
 
     const nextBtn = document.getElementById("nextEventBtn");
     const resetBtn = document.getElementById("resetEventBtn");
