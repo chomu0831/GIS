@@ -207,9 +207,16 @@
       .tl-item { min-width: 40px;}
     }
 
+    .sidepanel-photo-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin: 10px 0 18px 0;
+    }
     .sidepanel-photo {
-      max-width: 98%;
-      margin: 12px 0 18px 0;
+      max-width: 46%;
+      height: auto;
+      margin: 0;
       display: block;
       border-radius: 12px;
       box-shadow: 0 4px 18px rgba(0,0,0,0.13);
@@ -292,11 +299,19 @@
 
   // --- タイムライン ---
   const timeline = [
-    { year: 1979, label: "イラン革命", event: "イラン政変", map: "iranrev",
-      img: "イラン革命のお偉いさん.jpg", // ←ここをローカル画像ファイル名に
+    {
+      year: 1979,
+      label: "イラン革命",
+      event: "イラン政変",
+      map: "iranrev",
+      img: [
+        "イラン革命のお偉いさん.jpg",
+        "イラン革命集団.jpg"
+      ],
       desc: `この出来事は、イスラエルとイランの現在の対立構造の起点とも言えるものです。<br>
 それまで親米・親イスラエルだったイランは、革命を経てイスラム共和国となり、反米・反イスラエルの姿勢を鮮明に打ち出しました。<br>
-これにより、イスラエルはイランから敵視され、アメリカも関係を断絶。以後、イランは中東において反イスラエル勢力を支援し始めます。` },
+これにより、イスラエルはイランから敵視され、アメリカも関係を断絶。以後、イランは中東において反イスラエル勢力を支援し始めます。`
+    },
 
     { year: 1982, label: "レバノン内戦とヒズボラの台頭", event: "ヒズボラ台頭", map: "hezbollah",
       desc: `イランはレバノンのシーア派武装組織ヒズボラを積極的に支援し、イスラエルとの武力衝突が発生しました。<br>
@@ -458,19 +473,24 @@ IAEAがイランの核活動に懸念を示した直後の出来事であり、�
     // --- サイドパネル説明＋ボタン制御 ---
     const panel = document.getElementById("sidepanel");
     const content = document.getElementById("panelcontent");
-    const imgUrl = timeline[idx].img;
+    const imgData = timeline[idx].img;
     let imgTag = "";
-    if(imgUrl){
-      imgTag = `<img src="${imgUrl}" alt="${timeline[idx].label}" class="sidepanel-photo">`;
+    if (Array.isArray(imgData)) {
+      imgTag = `<div class="sidepanel-photo-row">` +
+        imgData.map(url =>
+          `<img src="${url}" alt="${timeline[idx].label}" class="sidepanel-photo">`
+        ).join("") +
+        `</div>`;
+    } else if (imgData) {
+      imgTag = `<img src="${imgData}" alt="${timeline[idx].label}" class="sidepanel-photo">`;
     }
     content.innerHTML = `<b>${timeline[idx].year} ${timeline[idx].label}</b><br>${imgTag}${timeline[idx].desc}`;
     panel.classList.add("active");
 
     // 画像アニメーション
-    if(imgUrl){
-      setTimeout(()=>{
-        const img = content.querySelector("img.sidepanel-photo");
-        if(img) img.classList.add("show");
+    if (imgTag) {
+      setTimeout(() => {
+        content.querySelectorAll("img.sidepanel-photo").forEach(img => img.classList.add("show"));
       }, 30);
     }
 
