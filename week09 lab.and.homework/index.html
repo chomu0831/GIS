@@ -228,6 +228,17 @@
       opacity: 1;
       transform: translateY(0) scale(1);
     }
+
+    .attack-anim-marker {
+      position: relative;
+      animation: attackAnim 1.2s ease-out forwards;
+      filter: drop-shadow(0 0 8px #e53935);
+      transition: filter 0.2s;
+    }
+    @keyframes attackAnim {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -452,6 +463,9 @@ IAEAがイランの核活動に懸念を示した直後の出来事であり、�
           patterns:[{offset:'100%',repeat:0,symbol:L.Symbol.arrowHead({pixelSize:18,polygon:false,pathOptions:{stroke:true,color:"#e53935"}})}]
         }).addTo(map);
       }
+      // ★ここでアニメーションを呼び出す
+      animateAttack(places["イラン"], places["イスラエル"], map, mapLayers);
+
       if(moveMap) map.setView([33,42],5);
     } else if(key==="israel_limited_response") {
       const marker = L.circleMarker(places["イラン"], {radius:16,color:COLOR["イラン"],fillColor:COLOR["イラン"],fillOpacity:0.97,weight:6})
@@ -539,6 +553,36 @@ IAEAがイランの核活動に懸念を示した直後の出来事であり、�
     <span class="legend-line"></span>国連分割案/国境線　
     <span class="legend-arrow"></span>イランの勢力輸出／攻撃の矢印
   `;
+
+  function animateAttack(from, to, map, mapLayers) {
+    // from, to: [lat, lng]
+    const steps = 60; // アニメーションのフレーム数
+    let current = 0;
+    const latStep = (to[0] - from[0]) / steps;
+    const lngStep = (to[1] - from[1]) / steps;
+    let marker = L.circleMarker(from, {
+      radius: 10,
+      color: "#e53935",
+      fillColor: "#e53935",
+      fillOpacity: 0.85,
+      weight: 2,
+      className: "attack-anim-marker"
+    }).addTo(map);
+    mapLayers.push(marker);
+
+    function move() {
+      if (current > steps) {
+        setTimeout(() => map.removeLayer(marker), 600); // 終了後に消す
+        return;
+      }
+      const lat = from[0] + latStep * current;
+      const lng = from[1] + lngStep * current;
+      marker.setLatLng([lat, lng]);
+      current++;
+      requestAnimationFrame(move);
+    }
+    move();
+  }
 </script>
 </body>
 </html>
