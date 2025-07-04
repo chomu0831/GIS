@@ -555,8 +555,7 @@ IAEAがイランの核活動に懸念を示した直後の出来事であり、�
   `;
 
   function animateAttack(from, to, map, mapLayers) {
-    // from, to: [lat, lng]
-    const steps = 150; // ←ここを増やすとゆっくりになる（例: 150）
+    const steps = 150;
     let current = 0;
     const latStep = (to[0] - from[0]) / steps;
     const lngStep = (to[1] - from[1]) / steps;
@@ -572,7 +571,9 @@ IAEAがイランの核活動に懸念を示した直後の出来事であり、�
 
     function move() {
       if (current > steps) {
-        setTimeout(() => map.removeLayer(marker), 600); // 終了後に消す
+        // 最後にピッタリ目標地点にセット
+        marker.setLatLng(to);
+        setTimeout(() => map.removeLayer(marker), 600);
         return;
       }
       const lat = from[0] + latStep * current;
