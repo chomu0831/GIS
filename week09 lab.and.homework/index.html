@@ -351,9 +351,11 @@
 国際社会、とりわけイスラエルは、これを「核兵器開発に極めて近い」と警戒しています。<a href="https://www3.nhk.or.jp/news/special/news_seminar/jiji/jiji14/" target="_brank rel="noopener">https://www3.nhk.or.jp/news/special/news_seminar/jiji/jiji14/</a>` },
 
     { year: 2024, label: "ダマスカス空爆", event: "2024年4月1日", map: "damascus2024",
+      youtube: "https://www.youtube.com/embed/6_T4XXNJ7eM", // ←追加
       desc: `ここで表示されるのは、2024年4月1日の「ダマスカス空爆」。<br>
 イスラエルがシリアのイラン大使館領事部を空爆し、イラン革命防衛隊の高官が死亡しました。<br>
-イランはこの攻撃に対し、明確な報復を宣言しました。` },
+イランはこの攻撃に対し、明確な報復を宣言しました。`
+    },
 
     { year: 2024.0413, label: "イランの報復攻撃", event: "2024年4月13日", map: "iran_response",
       img: "2024.1イラン報復攻撃.jpg",
@@ -363,12 +365,14 @@
 ヨルダンも領空を通過する飛翔体を撃墜しましたが、直接的な同盟関係は否定しています。` },
 
     { year: 2024.0419, label: "イスラエルの限定的報復攻撃", event: "2024年4月19日", map: "israel_limited_response",
+      youtube: "https://www.youtube.com/embed/UjctNEjF7YA", // ←追加
       desc: `次に表示されるのは、「2024年4月19日 イスラエルによる限定的な報復攻撃」。<br>
 イスラエルはイラン国内の目標に対して反撃しましたが、大規模な軍事衝突には至らず、<br>
-アメリカは自制を促す立場をとりました。` },
+アメリカは自制を促す立場をとりました。`
+    },
 
-    { year: 2025, label: "イラン核施設攻撃", event: "2025年6月12日", map: "nuclear_attack",
-      desc: `そして最後に表示されるのが、2025年6月12日、イスラエルがイラン国内の核関連施設を攻撃した出来事です。<br>
+    { year: 2025, label: "イラン核施設攻撃", event: "2025年6月13日", map: "nuclear_attack",
+      desc: `そして最後に表示されるのが、2025年6月13日、イスラエルがイラン国内の核関連施設を攻撃した出来事です。<br>
 ナタンツやテヘランが標的となり、多数の死傷者が発生しました。<br>
 IAEAがイランの核活動に懸念を示した直後の出来事であり、イランはこれに対して報復攻撃を実施。<br>
 イスラエルとイランの対立は、いよいよ臨界点に近づいています。` }
@@ -493,21 +497,24 @@ IAEAがイランの核活動に懸念を示した直後の出来事であり、�
     const panel = document.getElementById("sidepanel");
     const content = document.getElementById("panelcontent");
     const imgData = timeline[idx].img;
-    let imgTag = "";
-    if (Array.isArray(imgData)) {
-      imgTag = `<div class="sidepanel-photo-row">` +
+    const youtube = timeline[idx].youtube; // ←追加
+    let mediaTag = "";
+    if (youtube) {
+      mediaTag = `<div style="margin-bottom:12px;"><iframe width="98%" height="240" src="${youtube}" frameborder="0" allowfullscreen></iframe></div>`;
+    } else if (Array.isArray(imgData)) {
+      mediaTag = `<div class="sidepanel-photo-row">` +
         imgData.map(url =>
           `<img src="${url}" alt="${timeline[idx].label}" class="sidepanel-photo">`
         ).join("") +
         `</div>`;
     } else if (imgData) {
-      imgTag = `<img src="${imgData}" alt="${timeline[idx].label}" class="sidepanel-photo">`;
+      mediaTag = `<img src="${imgData}" alt="${timeline[idx].label}" class="sidepanel-photo">`;
     }
-    content.innerHTML = `<b>${timeline[idx].year} ${timeline[idx].label}</b><br>${imgTag}${timeline[idx].desc}`;
+    content.innerHTML = `<b>${timeline[idx].year} ${timeline[idx].label}</b><br>${mediaTag}${timeline[idx].desc}`;
     panel.classList.add("active");
 
     // 画像アニメーション
-    if (imgTag) {
+    if (imgData) {
       setTimeout(() => {
         content.querySelectorAll("img.sidepanel-photo").forEach(img => img.classList.add("show"));
       }, 30);
