@@ -324,26 +324,26 @@
 これにより、イスラエルはイランから敵視され、アメリカも関係を断絶。以後、イランは中東において反イスラエル勢力を支援し始めます。`
     },
 
-    { year: 1982, label: "レバノン内戦とヒズボラの台頭", event: "ヒズボラ台頭", map: "hezbollah",
+    { year: 1982, label: "レバノン内戦", event: "ヒズボラ台頭", map: "hezbollah", panelTitle:"レバノン内戦とヒズボラの台頭",
       img: ["レバノン.jpg", "レバノン内戦.jpg"],
       desc: `イランはレバノンのシーア派武装組織ヒズボラを積極的に支援し、イスラエルとの武力衝突が発生しました。<br>
 レバノン政府自体は中立的立場をとるものの、国内にヒズボラが存在することで複雑な情勢となっています。<br>
 また、シリアはこの時点でイランとの協力関係を強めており、ヒズボラの支援を側面から行っていました。` },
 
-    { year: 2000, label: "パレスチナ問題への介入", event: "パレスチナ情勢", map: "palestine2000",
+    { year: 2000, label: "パレスチナ問題", event: "パレスチナ情勢", map: "palestine2000", panelTitle: "パレスチナ問題とイランの介入", 
       img: "パレスチナ問題.png",
       desc: `イランはハマスやイスラム聖戦など、パレスチナのイスラム主義武装勢力を支援しており、<br>
 イスラエルとこれら勢力との間で武力衝突が頻発しています。<br>
 一方、エジプトやカタールなどの周辺国は、イスラエルともパレスチナ側とも関係を持ち、仲介を試みています。` },
 
-    { year: 2011, label: "シリア内戦における代理戦争", event: "シリア内戦", map: "syria",
+    { year: 2011, label: "シリア内戦", event: "シリア内戦", map: "syria", panelTitle:"シリア内戦における代理戦争",
       img: "シリア内戦.jpg",
       desc: `イランはシリアのアサド政権を支援し、シリア国内に軍事拠点を拡大。<br>
 イスラエルはこれを重大な脅威と捉え、イラン関連施設を何度も空爆しました。<br>
 ロシアやアメリカはシリアに関与しているものの、それぞれイラン・イスラエルのどちらかに強く与するわけではなく、<br>
 あくまで自国の影響力維持を目的とした中立的な立場を取っています。<a href="https://www.koukouseishinbun.jp/articles/-/3896" target="_blank" rel="noopener">https://www.koukouseishinbun.jp/articles/-/3896</a>` },
 
-    { year: 2015, label: "イランの核開発問題", event: "核合意と緊張再燃", map: "nuclear_issue",
+    { year: 2015, label: "イランの核開発", event: "核合意と緊張再燃", map: "nuclear_issue",panelTitle:"イランの核開発問題",
       img: ["イラン核開発問題.jpg", "イラン核合意.jpg"],
       desc: `イスラエルにとって、イランの核開発は最大級の安全保障上の脅威です。<br>
 2015年には核合意（JCPOA）が成立し、一時は国際的な緊張が緩和されましたが、<br>
@@ -364,7 +364,7 @@
 アメリカ、イギリス、フランスがイスラエルを支援し、防空迎撃に加わりました。<br>
 ヨルダンも領空を通過する飛翔体を撃墜しましたが、直接的な同盟関係は否定しています。` },
 
-    { year: 2024.0419, label: "イスラエルの限定的報復攻撃", event: "2024年4月19日", map: "israel_limited_response",
+    { year: 2024.0419, label: "イスラエルの報復攻撃", event: "2024年4月19日", map: "israel_limited_response",panelTitle:"イスラエルの限定的報復攻撃",
       youtube: "https://www.youtube.com/embed/UjctNEjF7YA", // ←追加
       desc: `次に表示されるのは、「2024年4月19日 イスラエルによる限定的な報復攻撃」。<br>
 イスラエルはイラン国内の目標に対して反撃しましたが、大規模な軍事衝突には至らず、<br>
@@ -510,7 +510,8 @@ IAEAがイランの核活動に懸念を示した直後の出来事であり、�
     } else if (imgData) {
       mediaTag = `<img src="${imgData}" alt="${timeline[idx].label}" class="sidepanel-photo">`;
     }
-    content.innerHTML = `<b>${timeline[idx].year} ${timeline[idx].label}</b><br>${mediaTag}${timeline[idx].desc}`;
+    const panelTitle = timeline[idx].panelTitle || timeline[idx].label; // panelTitleがなければlabelを使う
+    content.innerHTML = `<b>${timeline[idx].year} ${panelTitle}</b><br>${mediaTag}${timeline[idx].desc}`;
     panel.classList.add("active");
 
     // 画像アニメーション
